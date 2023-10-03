@@ -1,6 +1,8 @@
-#include <iostream>
+
+#ifndef MYSTACK
+#define MYSTACK
 #include <cassert>
-using namespace std;
+#include <iostream>
 
 template<typename T>
 class ArrayStack {
@@ -95,23 +97,8 @@ public:
     }
 };
 
+template<typename T>
+class LinkedStack {
+};
 
-int main(int, char**){
-    //stack test
-    int nums;       //number of tests
-    int opr, ops;   //0 pop, 1 push
-    ArrayStack<int> st;
-
-    cin >> nums;
-    for (int i = 0; i < nums; i++)
-    {
-        cin >> opr >> ops;
-        if(opr) {
-            st.push(ops);
-        } else {
-            st.pop();
-        }
-    }
-
-    st.show();
-}
+#endif
