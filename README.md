@@ -2,7 +2,7 @@
 
 > By Wenze Jin
 
-My Blog: [wenzejin.github.io](wenzejin.github.io)
+My Blog: [wenzejin.github.io](https://wenzejin.github.io)
 
 This project is tend to prepare templates of common data structures for online judge tests.
 
