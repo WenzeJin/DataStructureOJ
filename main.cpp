@@ -1,93 +1,65 @@
 #include <iostream>
 #include <cassert>
+
 using namespace std;
 
-template<typename T>
-class LinkedStack {
-    struct Node {
-        T val;
-        Node *next;
-    };
+int arr[1000000];
+long long k;
 
-    Node *head;
-    size_t _size;
+int main() {
+    int n;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        int cnt;
+        cin >> cnt >> k;
 
-public:
-    
-    LinkedStack() {
-        head = new Node();
-        _size = 0;
-        head->next = nullptr;
-    }
-
-    ~LinkedStack() {
-        Node *pt = head->next;
-        while(head != nullptr) {
-            delete head;
-            head = pt;
-            if(pt)
-                pt = pt->next;
+        for (int i = 1; i <= cnt; i++){
+            cin >> arr[i];
         }
-        head = nullptr;
-        _size = 0;
-    }
 
-    void push(T value){
-        Node *temp = new Node();
-        _size++;
-        temp->val = value;
-        temp->next = head->next;
-        head->next = temp;
-    }
+        long long sum = 0;
+        int left = 0;
+        int right = 0;
+        int min = cnt + 1;
 
-    T top(){
-        assert(_size > 0);
-        return head->next->val;
-    }
+        if (cnt > 10000) {
+            while(right != cnt || sum > k){
+                while(right < cnt && sum < k) {
+                    right++;
+                    sum += arr[right];
+                }
 
-    void pop(){
-        assert(_size > 0);
-        Node *temp = head->next;
-        head->next = temp->next;
-        delete temp;
-        _size--;
-    }
+                if(sum >= k && right - left < min) {
+                    min = right - left;
+                }
 
-    size_t size(){
-        return _size;
-    }
-
-    bool is_empty(){
-        return _size == 0;
-    }
-
-    void reverse_show() {
-        Node *pt = head->next;
-        while(pt != nullptr){
-            std::cout << pt->val << " ";
-            pt = pt->next;
-        }
-        std::cout << std::endl;
-    }
-};
-
-
-int main(int, char**){
-    //stack test
-    int nums;       //number of tests
-    int opr, ops;   //0 pop, 1 push
-    LinkedStack<int> st;
-
-    cin >> nums;
-    for (int i = 0; i < nums; i++)
-    {
-        cin >> opr >> ops;
-        if(opr) {
-            st.push(ops);
+                while(left < right && sum >= k) {
+                    if(right - left < min) {
+                        min = right - left;
+                    }
+                    left++;
+                    sum -= arr[left];
+                }
+            }
         } else {
-            st.pop();
+            for (int left = 1; left <= cnt; left ++) {
+                sum = 0;
+                for (int right = left; right <= cnt; right++)
+                {
+                    sum += arr[right];
+                    if(sum >= k) {
+                        if(right - left + 1 < min) {
+                            min = right - left + 1;
+                        }
+                        break;
+                    }
+                }
+            }
         }
-    }
 
-    st.reverse_show();
+        if(min == cnt + 1){
+            min = -1;
+        }
+        cout << min << endl;
+    }
 }
