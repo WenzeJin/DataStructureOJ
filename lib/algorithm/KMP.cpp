@@ -1,65 +1,59 @@
 #include <string>
-#include <vector>
 #include <iostream>
 
 int kmpStr(std::string tar, std::string mod) 
 {
-    std::vector<size_t> next;
-    
+    int tl = tar.length();
+    int ml = mod.length();
+
+    int * next = new int[ml];
+
     if(mod.length() <= 0) 
     {
         return -1;
     }
 
-    int lm = mod.length();
 
-    next.push_back(0);
-    size_t left = 0;
-    size_t right = 1;
-    while (right < lm)
+    int k = -1;
+    int right = 1;
+    while (right < ml)
     { 
-        if(mod[left] == mod[right]) 
+        if(k == -1 || mod[k] == mod[right]) 
         {
-            next.push_back(next[left - 1] + 1);
-            left++;
+            next[right] = k + 1;
+            k++;
             right++;
-        }
-        else if (left != 0)
-        {
-            left = next[left - 1];
-        }
-        else
-        {
-            next.push_back(0);
-            right++;
+        } else {
+            while(k != -1 && mod[k] != mod[right]) 
+            {
+                k = next[k];
+            }
         }
     }
 
-    next[0] = 0;
     size_t lt = tar.length();
-    size_t tar_pt = 0;
-    size_t mod_pt = 0;
+    int tar_pt = 0;
+    int mod_pt = 0;
 
-    while (mod_pt < lm && tar_pt < lt) 
+    while (mod_pt < ml && tar_pt < tl) 
     {
         if (tar[tar_pt] == mod[mod_pt]) 
         {
             tar_pt++;
             mod_pt++;
-        }
-        else if (mod_pt != 0) 
-        {
-            mod_pt = next[mod_pt - 1];
-        }
-        else
-        {
-            tar_pt++;
+        } else {
+            if(next[mod_pt] == -1) {
+                tar_pt++;
+                mod_pt = 0;
+            } else {
+                mod_pt = next[mod_pt];
+            }
         }
     }
 
-    if (mod_pt == lm) 
+    if (mod_pt == ml) 
     {
-        return tar_pt - lm;
+        return tar_pt - ml;
     }
 
     return -1;

@@ -8,8 +8,6 @@ enable_testing()
 
 add_executable(DataStructureOJ 
                 main.cpp 
-                lib/algorithm/KMP.h 
-                lib/algorithm/KMP.cpp
                 )
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

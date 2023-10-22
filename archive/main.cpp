@@ -81,57 +81,57 @@ int main() {
         }
     }
 
-    if(mod2.length() == 0 && mod1.length() > 0) {
-        for (int i = 0; i < n; i++) {
-            std::string tar;
-            std::cin >> tar;
-            int *res1 = kmpStr(tar.substr(0, tar.length() - 1), mod1);
-            if(res1[0]) {
-                std::cout << "true" << std::endl;
-            } else {
-                std::cout << "false" << std::endl;
+    for (int i = 0; i < n; i++) {
+        std::string tar;
+        std::cin >> tar;
+        int *res1 = kmpStr(tar, mod1);
+        int *res2 = kmpStr(tar, mod2);
+        int l1 = mod1.length();
+        
+        if(!res1 && !res2) {
+            std::cout << (tar.length() > 0 ? "true" : "false") << std::endl;
+        } else if(!res1) {
+            bool notfound = true;
+            for (int j = 1; j <= res2[0]; j++)
+            {
+                if(res2[j] >= 1) {
+                    notfound = false;
+                    std::cout << "true" << std::endl;
+                    break;
+                }
             }
-        }
-    } else {
-        for (int i = 0; i < n; i++) {
-            std::string tar;
-            std::cin >> tar;
-            int *res1 = kmpStr(tar, mod1);
-            int *res2 = kmpStr(tar, mod2);
-            int l1 = mod1.length();
-            
-            if(!res1 && !res2) {
-                std::cout << (tar.length() > 0 ? "true" : "false") << std::endl;
-            } else if(!res1) {
-                bool notfound = true;
-                for (int j = 1; j <= res2[0]; j++)
+            if (notfound)
+                std::cout << "false" << std::endl;
+        } else if(!res2) {
+            bool notfound = true;
+            for (int j = 1; j <= res1[0]; j++) 
+            {
+                if(res1[j] <= tar.length() - l1 - 1) 
                 {
-                    if(res2[j] >= 1) {
-                        notfound = false;
+                    notfound = false;
+                    std::cout << "true" << std::endl;
+                    break;
+                }
+            }
+            if (notfound)
+                std::cout << "false" << std::endl;
+        } else {
+            bool notfound = true;
+            for (int p1 = 1; p1 <= res1[0] && notfound; p1++) {
+                for (int p2 = res2[0]; p2 >= 1; p2 --) {
+                    if(res1[p1] + l1 + 1 == res2[p2]) {
                         std::cout << "true" << std::endl;
+                        notfound = false;
+                        break;
+                    }
+                    else if (res1[p1] + l1 + 1 > res2[p2])
+                    {
                         break;
                     }
                 }
-                if (notfound)
-                    std::cout << "false" << std::endl;
-            } else {
-                bool notfound = true;
-                for (int p1 = 1; p1 <= res1[0] && notfound; p1++) {
-                    for (int p2 = res2[0]; p2 >= 1; p2 --) {
-                        if(res1[p1] + l1 + 1 == res2[p2]) {
-                            std::cout << "true" << std::endl;
-                            notfound = false;
-                            break;
-                        }
-                        else if (res1[p1] + l1 + 1 > res2[p2])
-                        {
-                            break;
-                        }
-                    }
-                }
-                if(notfound) {
-                    std::cout << "false" << std::endl;
-                }
+            }
+            if(notfound) {
+                std::cout << "false" << std::endl;
             }
         }
     }
