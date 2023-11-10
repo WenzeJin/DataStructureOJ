@@ -1,138 +1,231 @@
-#include <string>
 #include <iostream>
-#include <vector>
+#include <cassert>
+#define ts UnionSet::trans
 
-int * kmpStr(std::string tar, std::string mod) 
-{
-    int *res = new int[100002];
-    int res_pt = 1;
-    int res_cnt = 0;
-    int tl = tar.length();
-    int ml = mod.length();
-    mod.push_back('*');
+using namespace std;
 
-    int *next = new int[ml + 1];
+template<typename T>
+class Deque {
 
-    if(ml <= 0) 
-    {
-        delete[] res;
-        return nullptr;
+    struct Node {
+        T val;
+        Node *prev;
+        Node *next;
+    };
+
+    Node *head;
+    size_t _size;
+
+public:
+
+    Deque() {
+        head = new Node();
+        head->prev = head;
+        head->next = head;
+        _size = 0;
     }
 
+    ~Deque() {
+        Node *pt = head->next;
+        while(pt != head) {
+            pt = pt->next;
+            delete pt->prev;
+        }
+        delete pt;
+        head = nullptr;
+    }
 
-    int k = 0;
-    int j = 1;
-    next[0] = -1;
-    while (j <= ml) {		//计算next[j]
-        k = next[j-1];
-        while(1) { 
-            if ( k == -1 || mod[j-1] == mod[k]) {
-                k++;
-                next[j] = k;
-                j++;
-                break;
-            }
-            else k = next[k];
+    void push_front(T& v) {
+        Node *temp = new Node();
+        temp->val = v;
+        temp->prev = head;
+        temp->next = head->next;
+        head->next = temp;
+        temp->next->prev = temp;
+        _size++;
+    }
+
+    void push_back(T& v) {
+        Node *temp = new Node();
+        temp->val = v;
+        temp->next = head;
+        temp->prev = head->prev;
+        head->prev = temp;
+        temp->prev->next = temp;
+        _size++;
+    }
+
+    T front() {
+        assert(_size > 0);
+        return head->next->val;
+    }
+
+    T back() {
+        assert(_size > 0);
+        return head->prev->val;
+    }
+
+    void pop_front() {
+        assert(_size > 0);
+        Node *old = head->next;
+        head->next = old->next;
+        head->next->prev = head;
+        delete old;
+        _size--;
+    }
+
+    void pop_back() {
+        assert(_size > 0);
+        Node *old = head->prev;
+        head->prev = old->prev;
+        head->prev->next = head;
+        delete old;
+        _size--;
+    }
+
+    bool empty() {
+        return _size == 0;
+    }
+
+    size_t size() {
+        return _size;
+    }
+};
+
+class UnionSet {
+    int *parent;
+
+public:
+
+    static inline int trans(int id) {
+        return id + 1;
+    }
+
+    UnionSet(size_t peopleNumber) {
+        parent = new int[peopleNumber + 3];
+        for (int i = 0; i < peopleNumber + 3; i++) {
+            parent[i] = -1;
         }
     }
 
-    size_t lt = tar.length();
-    int tar_pt = 0;
-    int mod_pt = 0;
+    bool findEqual(int p1, int p2) {
+        while(parent[p1] >= 0) {
+            p1 = parent[p1];
+        }
+        while(parent[p2] >= 0) {
+            p2 = parent[p2];
+        }
+        return p1 == p2;
+    }
 
-    while (mod_pt <= ml && tar_pt < tl) 
-    {
-        if (tar[tar_pt] == mod[mod_pt]) 
+    int find(int p) {
+        while(parent[p] >= 0) {
+            p = parent[p];
+        }
+        return p;
+    }
+
+    bool UnionAgainst(int p1, int p2) {
+        if(parent[p1] < 0 && parent[p2] < 0) {
+            parent[p1] = 1;
+            parent[p2] = 0;
+            return true;
+        }
+        if (parent[p1] < 0)
         {
-            tar_pt++;
-            mod_pt++;
-            if (mod_pt == ml) 
+            int test = find(p2);
+            if (test)
             {
-                res[res_pt] = tar_pt - ml;
-                res_pt++;
-                res_cnt++;
+                parent[p1] = 0;
             }
-        } else {
-            if(next[mod_pt] == -1) {
-                tar_pt++;
-                mod_pt = 0;
-            } else {
-                mod_pt = next[mod_pt];
+            else
+            {
+                parent[p1] = 1;
             }
+            return true;
         }
+        if (parent[p2] < 0)
+        {
+            int test = find(p1);
+            if(test) {
+                parent[p2] = 0;
+            } else {
+                parent[p2] = 1;
+            }
+            return true;
+        }
+        return !findEqual(p1, p2);
     }
+};
 
-    res[0] = res_cnt;
-    return res;
-}
 
 int main() {
-    int n;
-    std::cin >> n;
-    std::string mod;
-    std::cin >> mod;
-    std::string mod1;
-    std::string mod2;
-    for (int i = 0; i < mod.length(); i++) {
-        if (mod[i] == '*') {
-            mod1 = mod.substr(0, i);
-            mod2 = mod.substr(i + 1, mod.length() - i - 1);
-            break;
+    int num, cases;
+
+    cin >> num >> cases;
+
+    UnionSet buffer(num);
+
+    if(cases >= num) {
+        cout << "false" << endl;
+        return 0;
+    }
+
+    Deque<pair<int, int> > rst;
+
+    int lastlay = 0;
+    int currlay = 0;
+    bool pushed = false;
+
+    for (int i = 0; i < cases; i++) {
+        int p1, p2;
+        cin >> p1 >> p2;
+        if(buffer.find(ts(p1)) == ts(p1) && buffer.find(ts(p2)) == ts(p2)) {
+            if(pushed) {
+                pair<int, int> temp;
+                temp.first = p1;
+                temp.second = p2;
+                rst.push_back(temp);
+                lastlay++;
+            } else {
+                buffer.UnionAgainst(ts(p1), ts(p2));
+                pushed = true;
+            }
+        } else if(!buffer.UnionAgainst(ts(p1), ts(p2))) {
+            cout << "false" << endl;
+            return 0;
         }
     }
 
-    if(mod2.length() == 0 && mod1.length() > 0) {
-        for (int i = 0; i < n; i++) {
-            std::string tar;
-            std::cin >> tar;
-            int *res1 = kmpStr(tar.substr(0, tar.length() - 1), mod1);
-            if(res1[0]) {
-                std::cout << "true" << std::endl;
-            } else {
-                std::cout << "false" << std::endl;
+    while(lastlay) {
+        currlay = 0;
+        pushed = false;
+        for (int i = 0; i < lastlay; i++)
+        {
+            pair<int, int> tp = rst.front();
+            rst.pop_front();
+            int p1 = tp.first, p2 = tp.second;
+            if(buffer.find(ts(p1)) == ts(p1) && buffer.find(ts(p2)) == ts(p2)) {
+                if(pushed) {
+                    pair<int, int> temp;
+                    temp.first = p1;
+                    temp.second = p2;
+                    rst.push_back(temp);
+                    currlay++;
+                } else {
+                    buffer.UnionAgainst(ts(p1), ts(p2));
+                    pushed = true;
+                }
+            } else if(!buffer.UnionAgainst(ts(p1), ts(p2))) {
+                cout << "false" << endl;
+                return 0;
             }
         }
-    } else {
-        for (int i = 0; i < n; i++) {
-            std::string tar;
-            std::cin >> tar;
-            int *res1 = kmpStr(tar, mod1);
-            int *res2 = kmpStr(tar, mod2);
-            int l1 = mod1.length();
-            
-            if(!res1 && !res2) {
-                std::cout << (tar.length() > 0 ? "true" : "false") << std::endl;
-            } else if(!res1) {
-                bool notfound = true;
-                for (int j = 1; j <= res2[0]; j++)
-                {
-                    if(res2[j] >= 1) {
-                        notfound = false;
-                        std::cout << "true" << std::endl;
-                        break;
-                    }
-                }
-                if (notfound)
-                    std::cout << "false" << std::endl;
-            } else {
-                bool notfound = true;
-                for (int p1 = 1; p1 <= res1[0] && notfound; p1++) {
-                    for (int p2 = res2[0]; p2 >= 1; p2 --) {
-                        if(res1[p1] + l1 + 1 == res2[p2]) {
-                            std::cout << "true" << std::endl;
-                            notfound = false;
-                            break;
-                        }
-                        else if (res1[p1] + l1 + 1 > res2[p2])
-                        {
-                            break;
-                        }
-                    }
-                }
-                if(notfound) {
-                    std::cout << "false" << std::endl;
-                }
-            }
-        }
+        lastlay = currlay;
     }
+
+    cout << "true" << endl;
+
+    return 0;
 }
+
