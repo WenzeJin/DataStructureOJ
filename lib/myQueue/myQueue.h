@@ -33,7 +33,7 @@ public:
         head = nullptr;
     }
 
-    void push_front(T&& v) {
+    void push_front(T v) {
         Node *temp = new Node();
         temp->val = v;
         temp->prev = head;
@@ -43,7 +43,7 @@ public:
         _size++;
     }
 
-    void push_back(T&& v) {
+    void push_back(T v) {
         Node *temp = new Node();
         temp->val = v;
         temp->next = head;

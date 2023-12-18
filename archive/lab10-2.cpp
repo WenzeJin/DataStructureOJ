@@ -1,95 +1,84 @@
-#include <iostream>
+#include<map>
+#include<set>
+#include<iostream>
+
 using namespace std;
-int main()
-{
-    int n, k;
-    cin >> n >> k;
-    if (n == 1)
-    {
-        cout << "true";
-        return 0;
-    }
-    int arr[n + 1];
-    for (int i = 1; i <= n; i++)
-        arr[i] = 0;
-    pair<int, int> rest[10000];
-    int size = 0;
-    for (int i = 0; i < k; i++)
-    {
-        int a, b;
-        cin >> a >> b;
-        if (arr[a] == 0 || arr[b] == 0)
-        {
-            if (arr[a] != 0)
-                arr[b] = -arr[a];
-            else if (arr[b] != 0)
-                arr[a] = -arr[b];
-            else
-            {
-                if (i == 0)
-                {
-                    arr[a] = 1;
-                    arr[b] = -1;
-                }
-                else
-                {
-                    pair<int, int> p;
-                    p.first = a;
-                    p.second = b;
-                    rest[size++] = p;
-                }
-            }
-        }
-        else if (arr[a] == arr[b])
-        {
-            cout << "false";
-            return 0;
+
+class UnionSet {
+    unordered_map<int, int> parent;
+    int size_max;
+public:
+    UnionSet(): parent(),size_max(0) {}
+
+    void add(int x) {
+        parent[x] = -1;
+        if(0 - parent[x] > size_max) {
+            size_max = 0 - parent[x];
         }
     }
-    
-    while (size != 0)
-    {
-        int newsize = 0;
-        pair<int, int> newrest[size];
-        for (int i = 0; i < size; i++)
-        {
-            int a, b;
-            a = rest[i].first;
-            b = rest[i].second;
-            if (arr[a] == 0 || arr[b] == 0)
-            {
-                if (arr[a] != 0)
-                    arr[b] = -arr[a];
-                else if (arr[b] != 0)
-                    arr[a] = -arr[b];
-                else
-                {
-                    if (i == 0)
-                    {
-                        arr[a] = 1;
-                        arr[b] = -1;
-                    }
-                    else
-                    {
-                        pair<int, int> p;
-                        p.first = a;
-                        p.second = b;
-                        newrest[newsize++] = p;
-                    }
-                }
-            }
-            else if (arr[a] == arr[b])
-            {
-                cout << "false";
-                return 0;
-            }
+
+    int find(int x) {
+        while(parent[x] > 0) {
+            x = parent[x];
         }
-        size = newsize;
-        for (int i = 0; i < size; i++)
-        {
-            rest[i] = newrest[i];
-        }
+        return x;
     }
-    cout << "true";
-    return 0;
+
+    void unionGroup(int x, int y) {
+        while(parent[x] > 0) {
+            x = parent[x];
+        }
+        while(parent[y] > 0) {
+            y = parent[y];
+        }
+        if(x == y) {
+            return;
+        }
+        parent[x] = parent[x] + parent[y];
+        if(0 - parent[x] > size_max) {
+            size_max = 0 - parent[x];
+        }
+        parent[y] = x;
+    }
+
+    int getMax() {
+        return size_max;
+    }
+};
+
+
+
+
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        set<int> visited;
+        UnionSet buff;
+        for(auto x: nums) {
+            auto iter = visited.find(x);
+            if (iter != visited.end())
+            {
+                continue;
+            }
+            visited.insert(x);
+            buff.add(x);
+            iter = visited.find(x + 1);
+            if (iter != visited.end())
+            {
+                buff.unionGroup(x, x - 1);
+            }
+            if(iter != visited.end()) {
+                buff.unionGroup(x, x + 1);
+            }
+        }
+
+        return buff.getMax();
+    }
+};
+
+int main() {
+    Solution temp;
+    vector<int> question = { 4, 0, -4, -2, 2, 5, 2, 0, -8, -8, -8, -8, -1, 7, 4, 5, 5, -4, 6, 6, -3 };
+    int ans = temp.longestConsecutive(question);
+    cout << ans << endl;
 }
